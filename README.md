@@ -1,98 +1,198 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Invoices Manager v2
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A comprehensive invoice management system built with NestJS that automatically syncs orders from multiple eBay marketplaces and generates invoices for customers.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Features
 
-## Description
+- **Multi-Marketplace Integration**: Automatically syncs orders from eBay US, UK, and German marketplaces
+- **Real-time Order Processing**: Scheduled job runs every 5 minutes to fetch and process new orders
+- **Customer Management**: Stores customer information with address details and country codes
+- **Order Tracking**: Complete order lifecycle management with payment status tracking
+- **Invoice Generation**: Automated invoice creation for completed orders
+- **Database Persistence**: Robust data storage with PostgreSQL and TypeORM
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🛠️ Tech Stack
 
-## Project setup
+### Backend Framework
+- **NestJS** - Progressive Node.js framework for building scalable server-side applications
+- **TypeScript** - Type-safe JavaScript for better development experience
 
-```bash
-$ pnpm install
+### Database & ORM
+- **PostgreSQL** - Reliable, open-source relational database
+- **TypeORM** - Object-Relational Mapping library for TypeScript
+
+### Authentication & APIs
+- **eBay API** - Integration with eBay's Fulfillment API for order management
+- **OAuth 2.0** - Secure token-based authentication with eBay
+
+### Scheduling & Background Jobs
+- **@nestjs/schedule** - Cron job scheduling for automated order fetching
+
+### HTTP Client
+- **Axios** - Promise-based HTTP client for API requests
+
+### Development Tools
+- **ESLint** - Code linting and formatting
+- **pnpm** - Fast, disk space efficient package manager
+
+## 📁 Project Structure
+
+```
+src/
+├── entities/           # Database entities (Customer, Order, OrderItem)
+├── ebay/              # eBay integration module
+│   ├── ebay.service.ts        # Main eBay service with order processing
+│   ├── ebay.interfaces.ts     # TypeScript interfaces for eBay data
+│   ├── ebay.const.ts          # Constants and mappings
+│   └── ebay.module.ts         # eBay module configuration
+├── repositories/      # Data access layer
+├── shared/           # Shared constants and utilities
+├── migrations/       # Database migrations
+└── main.ts          # Application entry point
 ```
 
-## Compile and run the project
+## 🗄️ Database Schema
 
-```bash
-# development
-$ pnpm run start
+### Customers Table
+- Customer information with full name, username, and address details
+- Support for international addresses with country codes
+- Flexible address formatting for different countries
 
-# watch mode
-$ pnpm run start:dev
+### Orders Table
+- Order details with platform identification (eBay US/UK/DE)
+- Payment status tracking and dates
+- Total pricing with delivery costs
+- Currency support (USD, GBP, EUR)
 
-# production mode
-$ pnpm run start:prod
+### Order Items Table
+- Individual items within orders
+- SKU tracking and platform item IDs
+- Quantity and pricing information
+
+## 🔧 Environment Variables
+
+Create a `.env` file with the following variables:
+
+```env
+# eBay API Configuration
+EBAY_REFRESH_TOKEN=your_refresh_token
+EBAY_CLIENT_ID=your_client_id
+EBAY_CLIENT_SECRET=your_client_secret
+EBAY_SCOPE=your_scope_json
+
+# Database Configuration
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USERNAME=your_username
+DATABASE_PASSWORD=your_password
+DATABASE_NAME=invoices_manager
 ```
 
-## Run tests
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher)
+- PostgreSQL database
+- eBay Developer Account with API access
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd invoices-manager-v2
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+4. **Run database migrations**
+   ```bash
+   pnpm run migration:run
+   ```
+
+5. **Start the application**
+   ```bash
+   # Development mode
+   pnpm run start:dev
+   
+   # Production mode
+   pnpm run start:prod
+   ```
+
+## 🔄 How It Works
+
+### Order Processing Flow
+
+1. **Scheduled Job**: Every 5 minutes, the system fetches orders from eBay API
+2. **Order Filtering**: Only processes orders from the last 3 days
+3. **Duplicate Check**: Skips orders that already exist in the database
+4. **Data Transformation**: Converts eBay API data to internal database format
+5. **Database Storage**: Saves customer, order, and order item data
+6. **Payment Tracking**: Updates payment status for existing orders
+
+### Data Mapping
+
+The system automatically maps:
+- **Currency to Platform**: USD → EBAY_US, GBP → EBAY_GB, EUR → EBAY_DE
+- **Address Formatting**: Different formats for US vs international addresses
+- **Customer Data**: Full name, address, and contact information
+
+## 📊 API Endpoints
+
+- `GET /` - Health check endpoint
+- Additional endpoints can be added for invoice generation and reporting
+
+## 🔍 Logging
+
+The application provides comprehensive logging:
+- Order processing status
+- Customer and order creation confirmations
+- SKU tracking for order items
+- Error handling and debugging information
+
+## 🧪 Testing
 
 ```bash
-# unit tests
-$ pnpm run test
+# Unit tests
+pnpm run test
 
-# e2e tests
-$ pnpm run test:e2e
+# E2E tests
+pnpm run test:e2e
 
-# test coverage
-$ pnpm run test:cov
+# Test coverage
+pnpm run test:cov
 ```
 
-## Deployment
+## 📦 Docker Support
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+The project includes Docker configuration for easy deployment:
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+# Build and run with Docker Compose
+docker-compose up -d
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 🤝 Contributing
 
-## Resources
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-Check out a few resources that may come in handy when working with NestJS:
+## 📄 License
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Support
+## 🆘 Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+For support and questions, please open an issue in the repository or contact the development team.
