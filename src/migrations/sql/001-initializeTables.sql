@@ -49,7 +49,7 @@ CREATE TABLE orders (
     platform platform_enum NOT NULL,
     platform_order_id VARCHAR(250) NOT NULL,
     order_date TIMESTAMP NOT NULL,
-    payment_date TIMESTAMP NOT NULL,
+    payment_date TIMESTAMP NULL,
     paid BOOLEAN NOT NULL,
     total_price FLOAT NOT NULL,
     total_delivery FLOAT NOT NULL,

@@ -22,7 +22,7 @@ export class Order {
   @Column({ type: 'timestamp', nullable: false })
   order_date: Date;
 
-  @Column({ type: 'timestamp', nullable: false })
+  @Column({ type: 'timestamp', nullable: true })
   payment_date: Date;
 
   @Column({ type: 'boolean', nullable: false })
