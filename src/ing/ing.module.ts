@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { EbayService } from './ebay.service';
+import { IngService } from './ing.service';
 import { RepositoriesModule } from 'src/repositories/repositories.module';
 
 @Module({
   imports: [RepositoriesModule],
-  providers: [EbayService],
+  providers: [IngService]
 })
-export class EbayModule {}
+export class IngModule {}

@@ -33,8 +33,24 @@ export class RepositoriesService {
   }
 
   async addOrderItemsToDatabase(orderItems: OrderItem[]): Promise<void> {
-    for(const item of orderItems) {
+    for (const item of orderItems) {
       await this.orderItemsRepository.save(item);
     }
+  }
+
+  async getPaidOrdersWithoutInvoice(): Promise<Order[]> {
+    return await this.ordersRepository.find({ where: { paid: true, invoice_id: undefined } });
+  }
+
+  async getCustomer(customerId: number): Promise<Customer | null> {
+    return await this.customersRepository.findOne({ where: { id: customerId } });
+  }
+
+  async getOrderItems(orderId: number): Promise<OrderItem[] | null> {
+    return await this.orderItemsRepository.find({ where: { order_id: orderId } });
+  }
+
+  async addInvoiceId(orderId: number, invoiceId: number): Promise<void> {
+    await this.ordersRepository.update({ id: orderId }, { invoice_id: invoiceId });
   }
 }
