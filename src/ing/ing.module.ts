@@ -4,6 +4,7 @@ import { RepositoriesModule } from 'src/repositories/repositories.module';
 
 @Module({
   imports: [RepositoriesModule],
-  providers: [IngService]
+  providers: [IngService],
+  exports: [IngService]
 })
 export class IngModule {}

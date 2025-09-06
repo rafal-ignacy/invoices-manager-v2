@@ -7,6 +7,7 @@ import { EbayModule } from './ebay/ebay.module';
 import { RepositoriesModule } from './repositories/repositories.module';
 import { IngModule } from './ing/ing.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     EventEmitterModule.forRoot(),
     EbayModule,
     RepositoriesModule,
-    IngModule],
+    IngModule,
+    EmailModule],
   providers: [AppService],
 })
 export class AppModule { }

@@ -12,7 +12,11 @@ import * as PositionTypesNames from 'data/position_types.json';
 @Injectable()
 export class IngService implements OnModuleInit {
   private readonly logger = new Logger(IngService.name);
-  constructor(private readonly repositoriesService: RepositoriesService, private eventEmitter: EventEmitter2) { }
+
+  constructor(
+    private readonly repositoriesService: RepositoriesService,
+    private eventEmitter: EventEmitter2
+  ) { }
 
   onModuleInit() {
     this.createInvoices();
@@ -21,28 +25,35 @@ export class IngService implements OnModuleInit {
   @Cron(CronExpression.EVERY_5_MINUTES)
   private async createInvoices() {
     const orders = await this.repositoriesService.getPaidOrdersWithoutInvoice();
+    
+    if(orders.length === 0){
+      return;
+    }
+
     this.logger.log(`Successfully fetched ${orders.length} paid orders without invoice from the database`);
 
-    let invoicesList: number[] = [];
+    let invoiceIds: number[] = [];
     for (const order of orders) {
-
       const invoicePayload = await this.prepareInvoicePayload(order);
 
       if (!invoicePayload) {
         continue;
       }
-      this.logger.log(`Prepared ${invoicesList.length + 1} of ${orders.length} invoices payload`);
-      const invoiceId = await this.createInvoice(process.env.ING_KSIEGOWOSC_API_KEY!, invoicePayload);
+      this.logger.log(`Prepared ${invoiceIds.length + 1} of ${orders.length} invoices payload`);
+      const invoiceId = await this.createInvoice(invoicePayload);
 
-      if(!invoiceId) {
+      if (!invoiceId) {
         continue;
       }
 
       this.repositoriesService.addInvoiceId(order.id, invoiceId);
-      invoicesList.push(invoiceId);
+      invoiceIds.push(invoiceId);
       this.logger.log('Successfully saved invoice ID');
     }
-    this.eventEmitter.emit('invoices.created', invoicesList);
+
+    if (invoiceIds.length > 0) {
+      this.eventEmitter.emit('invoices.created', invoiceIds);
+    }
   }
 
   private async prepareInvoicePayload(order: Order): Promise<InvoiceDto | undefined> {
@@ -53,6 +64,7 @@ export class IngService implements OnModuleInit {
 
     if (!currency || !payment || !buyer || !positions || positions.length === 0) {
       this.logger.warn(`Cannot make an invoice - missing data - buyer: ${buyer}, currency: ${currency}, payment: ${payment}, positions: ${positions}`);
+      this.repositoriesService.addInvoiceId(order.id, 0);
       return;
     }
 
@@ -185,14 +197,9 @@ export class IngService implements OnModuleInit {
     return `${year}-${month}-${day}`;
   }
 
-  private async createInvoice(apiKey: string, data: InvoiceDto): Promise<number | undefined> {
-    const headers = {
-      'ApiUserCompanyRoleKey': apiKey,
-      'Content-Type': 'application/json'
-    }
-
+  private async createInvoice(data: InvoiceDto): Promise<number | undefined> {
     try {
-      const response = await axios.post('https://ksiegowosc.ing.pl/v2/api/public/create-invoice', data, { headers: headers });
+      const response = await axios.post('https://ksiegowosc.ing.pl/v2/api/public/create-invoice', data, { headers: this.getIngRequestHeaders() });
       if (response.status === 200) {
         this.logger.log('Successfully created an invoice in ING Księgowość');
         const invoiceId = response.data.id;
@@ -203,5 +210,27 @@ export class IngService implements OnModuleInit {
       this.logger.error('Error during creating the invoice: ', error.response.data);
     }
   }
-}
 
+  async downloadInvoice(invoiceId: number): Promise<Buffer | undefined> {
+    try {
+      const response = await axios.get(`https://ksiegowosc.ing.pl/v2/api/public/download-invoice/${invoiceId}/pdf`, {
+        responseType: 'arraybuffer',
+        headers: this.getIngRequestHeaders(),
+      });
+      if (response.status === 200) {
+        this.logger.log('Successfully downloaded an invoice from ING Księgowość');
+        return Buffer.from(response.data);
+      }
+      this.logger.warn('Could not download the invoice from ING Księgowość')
+    } catch (error) {
+      console.error('Error during downloading the invoice:', error.response.data);
+    }
+  }
+
+  private getIngRequestHeaders() {
+    return {
+      'ApiUserCompanyRoleKey': process.env.ING_KSIEGOWOSC_API_KEY!,
+      'Content-Type': 'application/json'
+    }
+  }
+}
