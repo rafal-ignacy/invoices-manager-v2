@@ -29,7 +29,7 @@ export class EmailService implements OnModuleInit {
 
   @OnEvent('invoices.created')
   async sendInvoices(invoiceIds: number[]) {
-    this.logger.debug('event email called');
+    this.logger.log('Sending email event');
     const invoicePdfs = await this.collectInvoices(invoiceIds);
     const customers = await this.collectCustomers(invoiceIds);
 
