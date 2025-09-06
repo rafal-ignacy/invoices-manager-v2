@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Customer } from 'src/entities/customer.entity';
 import { Order } from 'src/entities/order.entity';
 import { OrderItem } from 'src/entities/order_item.entity';
@@ -39,7 +39,7 @@ export class RepositoriesService {
   }
 
   async getPaidOrdersWithoutInvoice(): Promise<Order[]> {
-    return await this.ordersRepository.find({ where: { paid: true, invoice_id: undefined } });
+    return await this.ordersRepository.find({ where: { paid: true, invoice_id: IsNull() } });
   }
 
   async getCustomer(customerId: number): Promise<Customer | null> {
@@ -52,5 +52,11 @@ export class RepositoriesService {
 
   async addInvoiceId(orderId: number, invoiceId: number): Promise<void> {
     await this.ordersRepository.update({ id: orderId }, { invoice_id: invoiceId });
+  }
+
+  async getCustomerByInvoiceId(invoiceId: number): Promise<Customer | null> {
+    const order = await this.ordersRepository.findOne({ where: { invoice_id: invoiceId } });
+    const customer = await this.customersRepository.findOne({ where: { id: order?.customer_id}});
+    return customer;
   }
 }
