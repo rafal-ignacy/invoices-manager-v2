@@ -11,7 +11,7 @@ interface PrimaryPhone {
   phoneNumber: string;
 }
 
-export interface BuyerRegistrationAddress {
+export interface ShipTo {
   fullName: string;
   contactAddress: ContactAddress;
   primaryPhone?: PrimaryPhone;

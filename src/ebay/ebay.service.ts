@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit, HttpStatus } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
 import { RepositoriesService } from 'src/repositories/repositories.service';
-import { BuyerRegistrationAddress, LineItem } from './ebay.interfaces'
+import { ShipTo, LineItem } from './ebay.interfaces'
 import { Customer } from 'src/entities/customer.entity';
 import { CountryCode, Platform } from 'src/shared/shared.const';
 import { OrderItem } from 'src/entities/order_item.entity';
@@ -123,7 +123,7 @@ export class EbayService implements OnModuleInit {
   }
 
   private async addOrderToDatabase(order: any) {
-    const customer = this.prepareCustomerDetails(order.buyer.buyerRegistrationAddress, order.buyer.username);
+    const customer = this.prepareCustomerDetails(order.fulfillmentStartInstructions[0].shippingStep.shipTo, order.buyer.username);
     const orderItems = this.prepareOrderItemsDetails(order.lineItems);
     const orderDetails = this.prepareOrderDetails(order);
 
@@ -143,7 +143,7 @@ export class EbayService implements OnModuleInit {
     this.logger.log(`Successfully added ${orderItems.length} order items to database: ${orderItems.map(item => `SKU: ${item.sku || 'N/A'}`).join(', ')}`);
   }
 
-  private prepareCustomerDetails(customerDetails: BuyerRegistrationAddress, username: string): Customer {
+  private prepareCustomerDetails(customerDetails: ShipTo, username: string): Customer {
     const customer = new Customer();
 
     customer.username = username;

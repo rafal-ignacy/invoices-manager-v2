@@ -143,7 +143,7 @@ export class IngService implements OnModuleInit {
   }
 
   private getPositionName(sku: string): string | undefined {
-    const positionType = sku.match(/\d*([A-Z]{2,})\b/);
+    const positionType = sku.match(/^\d*([A-Z]+)-/);
     if (positionType) {
       return PositionTypesNames[positionType[1]];
     }
